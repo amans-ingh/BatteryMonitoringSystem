@@ -5,6 +5,11 @@ from datetime import datetime
 from bms.models import User, Battery
 random.seed()  # Initialize the random number generator
 
+@application.errorhandler(404)
+def page_not_found(e):
+    return redirect(url_for('index'))
+
+
 @application.route('/', methods=['GET', 'POST'])
 def index():
     username = request.cookies.get('username')
