@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    {% if title %}
+    <title>{{title}} - BMS</title>
+    {% else %}
+    <title>Battery Monitoring System</title>
+    {% endif %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/jpg" href="{{ url_for('static', filename='favicon.ico') }}"/>
+    {% block css%}{% endblock%}
+</head>
+
+<body class="bg-secondary mb-3">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" style="margin-left: 10px; margin-right: 10px;" href="/">BMS</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent" style="margin-left: 10px; margin-right: 10px;">
+        <ul class="navbar-nav">
+          <li class="nav-item mr-auto">
+            <a class="nav-link" href="./">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/ayushvarshn/MajorProject" target="_blank">Github</a>
+          </li>
+            {% if username %}
+          <li class="nav-item">
+            <a class="nav-link" href="./temperature">Temperature</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./voltage">Voltage</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./soc">SoC</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./soh">SoH</a>
+          </li>
+            {% endif %}
+        </ul>
+          <ul class="navbar-nav ms-auto">
+
+                  {% if username %}
+              <div class="btn-group">
+                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ username }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/home">Dashboard</a></li>
+                    <li><a class="dropdown-item" href="/user">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                  </ul>
+                </div>
+                  {% else %}
+                  <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+                  </li>
+                  {% endif %}
+
+
+
+          </ul>
+      </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+<!--    <footer class="text-center text-dark fixed-bottom" style="background-color: #787878;">-->
+<!--  <div class="container">-->
+<!--  <div class="text-left">-->
+<!--    Made By:-->
+<!--    <a class="text-dark">Aman Singh, Ayush Varshney, Alka Ann, Anu Joseph Under the guidance of Dr. Gopakumar P</a>-->
+<!--  </div>-->
+<!--      </div>-->
+<!--</footer>-->
+    {% block script%}{% endblock%}
+</body>
+
+</html>

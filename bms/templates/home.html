@@ -1,0 +1,285 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row p-4">
+        <div class="col-lg-3 col-sm-12 col-md-12 p-4">
+            <div class="card text-white bg-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">Temperature</h4>
+                <h5 class="card-text" id="temp">wait</h5>
+                <div class="container pt-4 text-white bg-secondary mb-3"><canvas id="canvas1"></canvas></div>
+                  <h6 class="card-text" id="tempdesc" align="justify">It is the measure of internal temperature of the battery. The temperature should be close to the ambient temperature to avoid any explosions.</h6>
+                <a href="./temperature" class="btn btn-primary">Monitor Temperature</a>
+              </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-12 col-md-12 p-4">
+            <div class="card text-white bg-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">Voltage</h4>
+                <h5 class="card-text" id="volt">wait</h5>
+                  <div class="container pt-4 text-white bg-secondary mb-3"><canvas id="canvas2"></canvas></div>
+                  <h6 class="card-text" id="voltdesc" align="justify">Battery Voltage or terminal voltage of a battery is the potential difference between its two terminals measure while current is being drawn.</h6>
+                <a href="./voltage" class="btn btn-primary">Monitor Voltage</a>
+              </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-12 col-md-12 p-4">
+            <div class="card text-white text-white bg-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">State of Charge</h4>
+                <h5 class="card-text" id="soc">wait</h5>
+                  <div class="container pt-4 text-white bg-secondary mb-3"><canvas id="canvas3"></canvas></div>
+                  <h6 class="card-text" id="socdesc" align="justify">SoC is the measure of available charge in th battery, or available energy that can be used by any load within allowed current range.</h6>
+                <a href="./soc" class="btn btn-primary">Monitor SoC</a>
+              </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-12 col-md-12 p-4">
+            <div class="card text-white bg-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">State of Health</h4>
+                <h5 class="card-text" id="soh">wait</h5>
+                  <div class="container pt-4 text-white bg-secondary mb-3"><canvas id="canvas4"></canvas></div>
+                  <h6 class="card-text" id="sohdesc" align="justify">SoH is the measure of health of the battery, or in other words, the capacity of the battery compared to the designed capacity.</h6>
+                <a href="./soh" class="btn btn-primary">Monitor SoH</a>
+              </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+<script>
+        $(document).ready(function () {
+            const config1 = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "Temperature",
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [],
+                        fill: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: false,
+                        text: 'Temperature Variation with Time'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Time'
+                            }
+                        }],
+                        yAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: false,
+                                labelString: 'Temperature in degree Celcius'
+                            }
+                        }]
+                    }
+                }
+            };
+            const config2 = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "Voltage",
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [],
+                        fill: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: false,
+                        text: 'Realtime Variation of Voltage'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Time'
+                            }
+                        }],
+                        yAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Voltage in Volts'
+                            }
+                        }]
+                    }
+                }
+            };
+            const config3 = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "soc",
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [],
+                        fill: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: false,
+                        text: 'Realtime graph of State of Charge'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: false,
+                                labelString: 'Time'
+                            }
+                        }],
+                        yAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: false,
+                                labelString: 'SoC in percent'
+                            }
+                        }]
+                    }
+                }
+            };
+            const config4 = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "soh",
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [],
+                        fill: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: false,
+                        text: 'State of Health with time'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Time'
+                            }
+                        }],
+                        yAxes: [{
+                            display: false,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'SoH in percent'
+                            }
+                        }]
+                    }
+                }
+            };
+
+            const context1 = document.getElementById('canvas1').getContext('2d');
+            const context2 = document.getElementById('canvas2').getContext('2d');
+            const context3 = document.getElementById('canvas3').getContext('2d');
+            const context4 = document.getElementById('canvas4').getContext('2d');
+
+            const lineChart1 = new Chart(context1, config1);
+            const lineChart2 = new Chart(context2, config2);
+            const lineChart3 = new Chart(context3, config3);
+            const lineChart4 = new Chart(context4, config4);
+
+            const source = new EventSource("/chart-data");
+
+            source.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                if (config1.data.labels.length === 20) {
+                    config1.data.labels.shift();
+                    config1.data.datasets[0].data.shift();
+                    config2.data.labels.shift();
+                    config2.data.datasets[0].data.shift();
+                    config3.data.labels.shift();
+                    config3.data.datasets[0].data.shift();
+                    config4.data.labels.shift();
+                    config4.data.datasets[0].data.shift();
+                }
+                document.getElementById("temp").innerHTML = 'Current Value = ' + data.temp + '°C';
+                document.getElementById("volt").innerHTML = 'Current Value = ' + data.voltage + 'V';
+                document.getElementById("soc").innerHTML = 'Current Value = ' + data.soc + '%';
+                document.getElementById("soh").innerHTML = 'Current Value = ' + data.soh + '%';
+                config1.data.labels.push(data.time);
+                config1.data.datasets[0].data.push(data.temp);
+                config2.data.labels.push(data.time);
+                config2.data.datasets[0].data.push(data.voltage);
+                config3.data.labels.push(data.time);
+                config3.data.datasets[0].data.push(data.soc);
+                config4.data.labels.push(data.time);
+                config4.data.datasets[0].data.push(data.soh);
+                lineChart1.update();
+                lineChart2.update();
+                lineChart3.update();
+                lineChart4.update();
+            }
+        });
+    </script>
+{% endblock %}
