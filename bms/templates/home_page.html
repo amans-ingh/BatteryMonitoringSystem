@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block content %}
+<div>
+{% for batt in batts %}
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-header">
+            {{batt.name}}
+        </div>
+        <div class="card-body ml-2 mr-2">
+            <div class="row justify-content-center bg-transparent ">
+                {% if batt.last_voltage %}
+                <div class="card-deck mb-3">
+                  <div class="card border-success bg-transparent" style="width: 140px;">
+                       <div class="card-header bg-transparent">Health</div>
+                       <div class="card-body">{{batt.last_health}} %</div>
+                  </div>
+                  <div class="card border-primary bg-transparent" style="width: 140px;">
+                      <div class="card-header bg-transparent">Temperature</div>
+                      <div class="card-body">{{batt.last_temp}} °C</div>
+                  </div>
+                  <div class="card border-info bg-transparent" style="width: 140px;">
+                      <div class="card-header bg-transparent">Voltage</div>
+                      <div class="card-body">{{batt.last_voltage}} V</div>
+                  </div>
+                  <div class="card border-warning bg-transparent" style="width: 140px;">
+                      <div class="card-header bg-transparent">Charge</div>
+                      <div class="card-body">{{batt.last_soc}} %</div>
+                  </div>
+                </div>
+                {% else %}
+                  <div class="mb-3">Use this token in your Battery Management System to connect to our monitoring system.</div>
+                {% endif %}
+            </div>
+            <div class="row">
+                <h6 class="text-white">Token: </h6>
+                <input type="password" class="form-control" id="{{batt.id}}" value="{{batt.token}}" readonly>
+                <div class="mt-2">
+                    <form action="" method="post">
+                        <input type="hidden" id="token" name="token" value="{{batt.token}}">
+                        <div class="btn btn-success" onclick="myFunction({{batt.id}})">Copy Token</div>
+                        <button type="submit" class="btn btn-primary" onclick="javascript: form.action='/dashboard';">Open Panel</button>
+                        <button type="submit" class="btn btn-danger" onclick="javascript: form.action='/delete';">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    function myFunction(x) {
+  /* Get the text field */
+  var copyText = document.getElementById(x);
+  document.getElementById(x).type = 'text';
+
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+}
+</script>
+{% endblock %}

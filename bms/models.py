@@ -17,7 +17,7 @@ class User(db.Model):
 class Battery(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    token = db.Column(db.String(30), nullable=False, default=token_hex(30))
+    token = db.Column(db.String(30), unique=True, nullable=False, default=token_hex(30))
     last_health = db.Column(db.Float, nullable=True)
     last_temp = db.Column(db.Float, nullable=False, default=30)
     last_soc = db.Column(db.Float, nullable=True)

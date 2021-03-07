@@ -1,5 +1,4 @@
-from datetime import datetime
-from flask import Flask, render_template, url_for, flash, redirect
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from secrets import token_hex
 app = Flask(__name__)
@@ -35,4 +34,4 @@ class Battery(db.Model):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=int('81'))

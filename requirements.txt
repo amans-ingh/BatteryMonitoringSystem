@@ -1,8 +1,7 @@
-virtualenv
 flask
 flask-sqlalchemy
 flask-bcrypt
-datetime
-json
-time
-random
+flask-restful
+flask-wtf
+python-secrets
+wtforms
