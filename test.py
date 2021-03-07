@@ -1,5 +1,11 @@
-from bms import db
+from datetime import datetime
+from flask import Flask, render_template, url_for, flash, redirect
+from flask_sqlalchemy import SQLAlchemy
 from secrets import token_hex
+app = Flask(__name__)
+app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db = SQLAlchemy(app)
 
 
 class User(db.Model):
@@ -26,3 +32,7 @@ class Battery(db.Model):
 
     def __repr__(self):
         return f"Post('{self.name}', '{self.token}')"
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
