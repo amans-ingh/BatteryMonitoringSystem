@@ -1,5 +1,17 @@
 {% extends 'layout.html' %}
 {% block content %}
+    <main role="main" class="container">
+        <div class="row">
+        <div class="col-lg-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
     <div class="content-section bg-dark text-white">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
@@ -83,5 +95,8 @@
             Already Have An Account? <a class="btn btn-warning ml-2" href="{{ url_for('login') }}">Sign In</a>
         </small>
     </div>
+        </div>
+        </div>
+    </main>
 {% endblock %}
 

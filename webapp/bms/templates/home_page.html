@@ -1,6 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
-<div>
+{% if batts %}
+    <div role="main" class="container">
+        <div class="row">
+        <div class="col-lg-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+
+        <div>
 {% for batt in batts %}
     <div class="card bg-dark text-white mb-4">
         <div class="card-header">
@@ -38,16 +53,36 @@
                     <form action="" method="post">
                         <input type="hidden" id="token" name="token" value="{{batt.token}}">
                         <div class="btn btn-success" onclick="myFunction({{batt.id}})">Copy Token</div>
-                        <button type="submit" class="btn btn-primary" onclick="javascript: form.action='/dashboard';">Open Panel</button>
                         <button type="submit" class="btn btn-danger" onclick="javascript: form.action='/delete';">Delete</button>
+                        {% if batt.last_voltage %}
+                        <button type="submit" class="btn btn-primary" onclick="javascript: form.action='/home/panel';">Open Panel</button>
+                        {% endif %}
                     </form>
                 </div>
             </div>
         </div>
     </div>
 {% endfor %}
+        </div>
+        </div>
+        </div>
+    </div>
+{% else %}
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center my-6">
+  <main role="main" class="inner cover my-auto">
+    <h1 class="cover-heading text-white">Oops! Nothing Here</h1>
+    <p class="lead">Get started by adding your battery to the monitoring system</p>
+    <p class="lead">
+      <a href="{{url_for('add')}}" class="btn btn-lg btn-secondary">Add Battery</a>
+    </p>
+  </main>
 </div>
+    {% endif %}
 {% endblock %}
+
+
+
+
 {% block script %}
 <script>
     function myFunction(x) {

@@ -1,5 +1,17 @@
 {% extends "layout.html" %}
 {% block content %}
+    <main role="main" class="container">
+        <div class="row">
+        <div class="col-lg-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
 <div class="content-section bg-dark text-white">
   <div class="media">
     <img class="rounded-circle account-img" src="{{ url_for('static', filename='images/default.jpg') }}">
@@ -53,14 +65,9 @@
                         {{ form.email(class="form-control form-control-sm") }}
                     {% endif %}
                 </div>
-<!--                <div style="display: none;">-->
-<!--                {{ form.prev_username(class="form-control form-control-sm is-invalid") }}-->
-<!--                {{ form.prev_email(class="form-control form-control-sm is-invalid") }}-->
-<!--                </div>-->
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
-<!--                <div class="btn btn-warning" href="#">Change Password</div>-->
             </div>
         </form>
     </div>
@@ -69,4 +76,7 @@
             Password Compromised? <a class="btn btn-warning ml-2" href="{{ url_for('changepassword') }}">Change Password</a>
         </small>
     </div>
+        </div>
+        </div>
+    </main>
 {% endblock %}

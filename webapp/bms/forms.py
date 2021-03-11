@@ -6,13 +6,10 @@ from bms.models import User
 
 class RegistrationForm(FlaskForm):
     name = StringField('Name', validators=[Length(min=2, max=30)])
-    username = StringField('Username',
-                           validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    username = StringField('Username', validators=[Length(min=2, max=20)])
+    email = StringField('Email', validators=[Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password',
-                                     validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm Password', validators=[EqualTo('password')])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -27,32 +24,31 @@ class RegistrationForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
 
 class UpdateAccountForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    name = StringField('Name', validators=[Length(min=2, max=30)])
+    username = StringField('Username', validators=[Length(min=2, max=20)])
+    email = StringField('Email', validators=[Email()])
     prev_username = StringField('username_prev')
     prev_email = StringField('email_prev')
     submit = SubmitField('Update')
 
 
 class AddBattery(FlaskForm):
-    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=20)])
-    capacity = SelectField('Capacity', default='select', choices=[('select', 'Select Capacity'), ('1.1', '1.1 Ampere Hour')])
-    voltage = SelectField('Voltage', default='select', choices=[('select', 'Select nominal voltage'), ('3.3', '3.3 Volts')])
+    name = StringField('Name', validators=[Length(min=2, max=20)])
+    capacity = SelectField('Capacity', default='1.1', choices=[('1.1', '1.1 Ampere Hour')])
+    voltage = SelectField('Voltage', default='3.3', choices=[('3.3', '3.3 Volts')])
     submit = SubmitField('Add')
 
 
 class ChangePassword(FlaskForm):
-    username = StringField('Username')
+    username = StringField('Username', validators=[Length(min=2, max=20)])
     password = PasswordField('Current Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('new_password')])
+    confirm_password = PasswordField('Confirm Password', validators=[EqualTo('new_password')])
     submit = SubmitField('Change')
