@@ -6,14 +6,14 @@
 <div class="container">
   <div class="col-md-12">
     <div class="overview-wrap">
-      <h1 class="text-white">Dashboard</h1>
+      <h1 class="text-info">Dashboard</h1>
     </div>
     <div class="row mt-5">
       <div class="col-md-3 col-sm-6">
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Health</h4>
-            <h1 class="mt-4 text-white" id="health-ov">96 %</h1>
+            <h1 class="mt-4 text-white" id="health-ov">{{battery.last_health}} %</h1>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Temperature</h4>
-            <h1 class="mt-4 text-white" id="temp-ov">30.4 °C</h1>
+            <h1 class="mt-4 text-white" id="temp-ov">{{battery.last_temp}} °C</h1>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Voltage</h4>
-            <h1 class="mt-4 text-white" id="voltage-ov">3.42 V</h1>
+            <h1 class="mt-4 text-white" id="voltage-ov">{{battery.last_voltage}} V</h1>
           </div>
         </div>
       </div>
@@ -37,63 +37,47 @@
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Charge</h4>
-            <h1 class="mt-4 text-white" id="charge-ov">32 %</h1>
+            <h1 class="mt-4 text-white" id="charge-ov">{{battery.last_soc}} %</h1>
           </div>
         </div>
       </div>
     </div>
     <div class="row mt-4">
-      <div class="col-md-12">
-        <div class="card bg-dark mb-5">
-          <div class="ml-2 mt-2 mb-2">
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" id="health-tab" data-toggle="tab" href="#health" role="tab"
-                  aria-controls="health" aria-selected="true">Health</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="temp-tab" data-toggle="tab" href="#temp" role="tab" aria-controls="temp"
-                  aria-selected="false">Temperature</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="voltage-tab" data-toggle="tab" href="#voltage" role="tab"
-                  aria-controls="voltage" aria-selected="false">Voltage</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="charge-tab" data-toggle="tab" href="#charge" role="tab" aria-controls="charge"
-                  aria-selected="false">Charge</a>
-              </li>
-            </ul>
-          </div>
-          <div class="card-body">
-            <div class="tab-content" id="myTabContent">
-              <div class="tab-pane fade show active" id="health" role="tabpanel" aria-labelledby="health-tab">
-                <div class="container-fluid">
-                  <canvas id="health-chart"></canvas>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="temp" role="tabpanel" aria-labelledby="temp-tab">
-                <div class="container-fluid">
-                  <canvas id="temp-chart"></canvas>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="voltage" role="tabpanel" aria-labelledby="voltage-tab">
-                <div class="container-fluid">
-                  <canvas id="voltage-chart"></canvas>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="charge" role="tabpanel" aria-labelledby="charge-tab">
-                <div class="container-fluid">
-                  <canvas id="charge-chart"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="col-lg-6">
+        <div class="card bg-dark mb-4">
+          <h1 class="text-white mb-4 mx-auto">State of Health</h1>
+          <canvas id="health-chart"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card bg-dark">
+          <h1 class="text-white mb-4 mx-auto">Temperature</h1>
+          <canvas id="temp-chart"></canvas>
         </div>
       </div>
     </div>
+    <div class="row mt-4">
+      <div class="col-lg-6">
+        <div class="card bg-dark mb-4">
+          <h1 class="text-white mb-4 mx-auto">Voltage</h1>
+          <canvas id="voltage-chart"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card bg-dark">
+          <h1 class="text-white mb-4 mx-auto">State of Charge</h1>
+          <canvas id="charge-chart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4 mb-4">
+      All the graphs are plotted with y-axis taken as the quantity measured and x-axis being time. This graph is not
+      scale.
+    </div>
   </div>
 </div>
+
+
 {% endblock %}
 {% block script %}
 <script>
@@ -102,12 +86,24 @@
     data: {
       labels: {{ time }},
   datasets: [{
+    fill: false,
+    borderColor: "#ffffff",
+    backgroundColor: "#ffffff",
+    pointBackgroundColor: "#ffffff",
+    pointBorderColor: "#ffffff",
+    pointHoverBackgroundColor: "#ffffff",
+    pointHoverBorderColor: "#ffffff",
     data: {{ temp }}
         }]
     },
   options: {
+    elements: {
+      point:{
+        radius: 0
+      }
+    },
     title: {
-      display: true,
+      display: false,
         text: 'Temperature',
           fontSize: 25
     },
@@ -121,8 +117,8 @@
     layout: {
       padding: {
         left: 50,
-          right: 0,
-            bottom: 0,
+          right: 50,
+            bottom: 50,
               top: 0
       }
     },
@@ -131,29 +127,45 @@
     },
     scales: {
       yAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'Temperature in °C'
+        },
         ticks: {
           suggestedMin: 25,
           suggestedMax: 45
         }
       }],
-      xAxes: [{
-        display: false
-      }]
+        xAxes: [{
+          display: false
+        }]
     }
   }
     };
 
-    var config2 = {
+  var config2 = {
     type: 'line',
     data: {
       labels: {{ time }},
   datasets: [{
+    fill: false,
+    borderColor: "#ffffff",
+    backgroundColor: "#ffffff",
+    pointBackgroundColor: "#ffffff",
+    pointBorderColor: "#ffffff",
+    pointHoverBackgroundColor: "#ffffff",
+    pointHoverBorderColor: "#ffffff",
     data: {{ voltage }}
         }]
     },
   options: {
+    elements: {
+      point:{
+        radius: 0
+      }
+    },
     title: {
-      display: true,
+      display: false,
         text: 'Voltage',
           fontSize: 25
     },
@@ -167,8 +179,8 @@
     layout: {
       padding: {
         left: 50,
-          right: 0,
-            bottom: 0,
+          right: 50,
+            bottom: 50,
               top: 0
       }
     },
@@ -177,29 +189,45 @@
     },
     scales: {
       yAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'Voltage in Volts'
+        },
         ticks: {
-          suggestedMin: 2,
+          suggestedMin: 1.8,
           suggestedMax: 4.5
         }
       }],
-      xAxes: [{
-        display: false
-      }]
+        xAxes: [{
+          display: false
+        }]
     }
   }
     };
 
-    var config3 = {
+  var config3 = {
     type: 'line',
     data: {
       labels: {{ time }},
   datasets: [{
-    data: {{ temp }}
+    fill: false,
+    borderColor: "#ffffff",
+    backgroundColor: "#ffffff",
+    pointBackgroundColor: "#ffffff",
+    pointBorderColor: "#ffffff",
+    pointHoverBackgroundColor: "#ffffff",
+    pointHoverBorderColor: "#ffffff",
+    data: {{ health }}
         }]
     },
   options: {
+    elements: {
+      point:{
+        radius: 0
+      }
+    },
     title: {
-      display: true,
+      display: false,
         text: 'Health',
           fontSize: 25
     },
@@ -213,8 +241,8 @@
     layout: {
       padding: {
         left: 50,
-          right: 0,
-            bottom: 0,
+          right: 50,
+            bottom: 50,
               top: 0
       }
     },
@@ -223,29 +251,45 @@
     },
     scales: {
       yAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'SoH in %'
+        },
         ticks: {
           suggestedMin: 70,
           suggestedMax: 100
         }
       }],
-      xAxes: [{
-        display: false
-      }]
+        xAxes: [{
+          display: false
+        }]
     }
   }
     };
 
-    var config4 = {
+  var config4 = {
     type: 'line',
     data: {
       labels: {{ time }},
   datasets: [{
+    fill: false,
+    borderColor: "#ffffff",
+    backgroundColor: "#ffffff",
+    pointBackgroundColor: "#ffffff",
+    pointBorderColor: "#ffffff",
+    pointHoverBackgroundColor: "#ffffff",
+    pointHoverBorderColor: "#ffffff",
     data: {{ charge }}
         }]
     },
   options: {
+    elements: {
+      point:{
+        radius: 0
+      }
+    },
     title: {
-      display: true,
+      display: false,
         text: 'Charge',
           fontSize: 25
     },
@@ -259,8 +303,8 @@
     layout: {
       padding: {
         left: 50,
-          right: 0,
-            bottom: 0,
+          right: 50,
+            bottom: 50,
               top: 0
       }
     },
@@ -269,14 +313,18 @@
     },
     scales: {
       yAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'SoC in %'
+        },
         ticks: {
           suggestedMin: 0,
           suggestedMax: 100
         }
       }],
-      xAxes: [{
-        display: false
-      }]
+        xAxes: [{
+          display: false
+        }]
     }
   }
     };
@@ -288,15 +336,30 @@
   var myChart3 = new Chart(chart3, config3);
   var chart4 = document.getElementById('charge-chart').getContext('2d');
   var myChart4 = new Chart(chart4, config4);
-  const source = new EventSource("/chart?token={{ token }}");
+
+
+  const source = new EventSource("/chart-data/{{battery.token}}");
+
 
   source.onmessage = function (event) {
-                const data = JSON.parse(event.data);
-                document.getElementById('health-ov').innerHTML = data.health
-                document.getElementById('temp-ov').innerHTML = data.temp
-                document.getElementById('voltage-ov').innerHTML = data.voltage
-                document.getElementById('charge-ov').innerHTML = data.charge
-            }
+    const data = JSON.parse(event.data);
+    config1.data.labels = data.time;
+    config1.data.datasets[0].data = data.temp;
+    config2.data.labels = data.time;
+    config2.data.datasets[0].data = data.voltage;
+    config3.data.labels = data.time;
+    config3.data.datasets[0].data = data.health;
+    config4.data.labels = data.time;
+    config4.data.datasets[0].data = data.charge;
+    myChart1.update();
+    myChart2.update();
+    myChart3.update();
+    myChart4.update();
+    document.getElementById("temp-ov").innerHTML = data.t + ' °C';
+    document.getElementById("voltage-ov").innerHTML = data.vol + ' V';
+    document.getElementById("charge-ov").innerHTML = data.soc + ' %';
+    document.getElementById("health-ov").innerHTML = data.soh + ' %';
+  }
 
 </script>
 {% endblock %}

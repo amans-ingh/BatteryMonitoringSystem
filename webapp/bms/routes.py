@@ -6,20 +6,29 @@ from bms.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddBattery
 import os
 from bms.charts import MyChart
 import json
+import random
+from datetime import datetime
 import time
 
 
 @application.errorhandler(404)
 def page_not_found(e):
-    return redirect(url_for('index'))
+    return redirect(url_for('loading'))
 
 
 @application.route('/')
+def loading():
+    username = request.cookies.get('email')
+    if username:
+        return redirect(url_for('index'))
+    return render_template('loading.html')
+
+@application.route('/index')
 def index():
     username = request.cookies.get('email')
     if username:
-        return render_template('index.html', username=username)
-    return render_template('index.html')
+        return render_template('index.html', username=username, index=1)
+    return render_template('index.html', index=1)
 
 
 @application.route('/login', methods=['GET', 'POST'])
@@ -141,12 +150,23 @@ def logout():
     return resp
 
 
-@application.route('/delete', methods=['GET', 'POST'])
-def delete():
+@application.route('/confirmdelete/<token>', methods=['GET'])
+def confirm_delete(token):
     username = request.cookies.get('email')
     if username:
-        if request.method == 'POST':
-            token = request.form.get('token')
+        if request.method == 'GET':
+            battery = Battery.query.filter_by(token=token).first()
+            if battery:
+                return render_template('confirm_delete.html', token=token, username=username, title='Confirm Delete')
+            return redirect(url_for('home'))
+        return redirect(url_for('home'))
+    return redirect(url_for('login'))
+
+@application.route('/delete/<token>', methods=['GET', 'POST'])
+def delete(token):
+    username = request.cookies.get('email')
+    if username:
+        if request.method == 'GET':
             Battery.query.filter_by(token=token).delete()
             db.session.commit()
             if os.path.exists('csv/'+token+'.csv'):
@@ -167,18 +187,61 @@ def forgot_password():
     return render_template('forgot_password.html')
 
 
-@application.route('/home/panel', methods=['GET', 'POST'])
-def panel():
+@application.route('/home/panel/<token>', methods=['GET', 'POST'])
+def panel(token):
     username = request.cookies.get('email')
     if username:
-        if request.method == 'POST':
-            token = request.form.get('token')
-            if Battery.query.filter_by(token=token).first():
+        if request.method == 'GET':
+            battery = Battery.query.filter_by(token=token).first()
+            if battery:
                 chartdata = MyChart(token)
                 time = chartdata.sample('time', 30, 1000)
                 voltage = chartdata.sample('voltage', 30, 1000)
                 temp = chartdata.sample('temp', 30, 1000)
                 charge = chartdata.sample('soc', 30, 1000)
-                return render_template('panel.html', title='Dashboard', username=username, time=time, temp=temp, voltage=voltage, charge=charge, token=token)
+                health = chartdata.sample_all('soh', 30)
+                return render_template('panel.html',
+                                       title='Dashboard',
+                                       username=username,
+                                       time=time,
+                                       temp=temp,
+                                       voltage=voltage,
+                                       charge=charge,
+                                       battery=battery,
+                                       health=health,
+                                       token=token
+                                       )
         return render_template('panel.html', title='Dashboard', username=username)
     return redirect(url_for('login', next=request.endpoint))
+
+
+@application.route('/chart-data/<token>')
+def chart_data(token):
+    def generate_random_data(token):
+        while True:
+            battery = Battery.query.filter_by(token=token).first()
+            chartdata = MyChart(token)
+            time = chartdata.sample('time', 30, 1000)
+            voltage = chartdata.sample('voltage', 30, 1000)
+            vol = battery.last_voltage
+            temp = chartdata.sample('temp', 30, 1000)
+            t = battery.last_temp
+            charge = chartdata.sample('soc', 30, 1000)
+            soc = battery.last_soc
+            health = chartdata.sample_all('soh', 30)
+            soh = battery.last_health
+            json_data = json.dumps(
+                {'time': time,
+                 'voltage': voltage,
+                 'temp': temp,
+                 'charge': charge,
+                 'health': health,
+                 'vol': vol,
+                 't': t,
+                 'soc': soc,
+                 'soh': soh
+                 })
+            yield f"data:{json_data}\n\n"
+            time.sleep(1)
+
+    return Response(generate_random_data(token), mimetype='text/event-stream')

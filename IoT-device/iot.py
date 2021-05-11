@@ -32,10 +32,8 @@ class InternetOfThings:
     def write(self, row_data):
         print('data = ' + str(row_data))
         response = requests.put(self.end + self.token + '/write', data=row_data)
-        print(response.json())
         if response:
             response_json = response.json()
-            print(response_json['message'])
             if response_json['message'] == 'ok':
                 return 'success'
             elif response_json['message'] == 'invalid-token':

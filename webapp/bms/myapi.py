@@ -5,6 +5,7 @@ from bms import db
 import csv
 import os
 import pandas as pd
+import time
 
 
 class MyApi(Resource):
@@ -22,7 +23,7 @@ class MyApi(Resource):
                     return {'message': '0'}
                 with open('csv/' + token + '.csv', 'a+', newline='') as f:
                     dataset = csv.writer(f, delimiter=',')
-                    dataset.writerow(['cycles', 'time', 'current', 'voltage', 'temp', 'index', 'soc'])
+                    dataset.writerow(['cycles', 'time', 'current', 'voltage', 'temp', 'index', 'soc', 'soh'])
                 return {'message': '0'}
             return {'message': 'no-task'}
         return {'message': 'invalid-token'}
@@ -34,9 +35,11 @@ class MyApi(Resource):
                 dataf = pd.read_csv('csv/' + token + '.csv')
                 length = len(dataf.index)
                 soc_prediction = '0'
+                soh_prediction = '0'
                 if length > 5:
                     predictor = MachineLearningModel(token)
                     soc_prediction = predictor.predict_soc()
+                    soh_prediction = predictor.predict_soh()
                 with open('csv/'+token+'.csv', 'a', newline='') as f:
                     dataset = csv.writer(f, delimiter=',')
                     dataset.writerow([request.form['cycles'],
@@ -45,11 +48,13 @@ class MyApi(Resource):
                                       request.form['voltage'],
                                       request.form['temp'],
                                       request.form['index'],
-                                      soc_prediction
+                                      soc_prediction,
+                                      soh_prediction
                                       ])
                 battery.last_soc = soc_prediction
-                battery.last_temp = request.form['temp']
-                battery.last_voltage = request.form['voltage']
+                battery.last_health = soh_prediction
+                battery.last_temp = '%.2f' % float(request.form['temp'])
+                battery.last_voltage = '%.2f' % float(request.form['voltage'])
                 battery.last_time = request.form['index']
                 db.session.commit()
                 return {'message': 'ok'}

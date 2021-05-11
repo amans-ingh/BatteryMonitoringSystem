@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center my-6">
+  <main role="main" class="inner cover my-auto">
+    <h1 class="cover-heading text-white">Are you sure?</h1>
+    <p class="lead">All the data associated with this battery will be deleted. Proceed?</p>
+    <p class="lead">
+      <a href="/delete/{{ token }}" class="btn btn-lg btn-danger">Confirm Delete</a>
+      <a href="{{url_for('home')}}" class="btn btn-lg btn-secondary">Cancel</a>
+    </p>
+  </main>
+</div>
+
+{% endblock %}

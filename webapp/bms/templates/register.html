@@ -12,7 +12,12 @@
               {% endfor %}
             {% endif %}
           {% endwith %}
-    <div class="content-section bg-dark text-white">
+    <div class="bg-dark text-white" style="background: #ffffff;
+  padding: 10px 20px;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  position: relative;">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
@@ -32,7 +37,7 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
+                    {{ form.username.label(class="form-control-label mt-4") }}
 
                     {% if form.username.errors %}
                         {{ form.username(class="form-control form-control-sm is-invalid") }}
@@ -46,7 +51,7 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
+                    {{ form.email.label(class="form-control-label mt-4") }}
                     {% if form.email.errors %}
                         {{ form.email(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -59,7 +64,7 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
+                    {{ form.password.label(class="form-control-label mt-4") }}
                     {% if form.password.errors %}
                         {{ form.password(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -72,7 +77,7 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.confirm_password.label(class="form-control-label") }}
+                    {{ form.confirm_password.label(class="form-control-label mt-4") }}
                     {% if form.confirm_password.errors %}
                         {{ form.confirm_password(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -86,12 +91,12 @@
                 </div>
             </fieldset>
             <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
+                {{ form.submit(class="btn btn-outline-info mt-4") }}
             </div>
         </form>
     </div>
     <div class="border-top pt-3">
-        <small class="text-white">
+        <small class="text-primary">
             Already Have An Account? <a class="btn btn-warning ml-2" href="{{ url_for('login') }}">Sign In</a>
         </small>
     </div>

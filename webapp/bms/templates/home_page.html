@@ -24,40 +24,38 @@
         <div class="card-body ml-2 mr-2">
             <div class="row justify-content-center bg-transparent ">
                 {% if batt.last_voltage %}
-                <div class="card-deck mb-3">
+                <div class="card-group mb-3">
                   <div class="card border-success bg-transparent" style="width: 140px;">
-                       <div class="card-header bg-transparent">Health</div>
-                       <div class="card-body">{{batt.last_health}} %</div>
+                       <div class="card-header bg-transparent text-white">Health</div>
+                       <div class="card-body text-white">{{batt.last_health}} %</div>
                   </div>
                   <div class="card border-primary bg-transparent" style="width: 140px;">
-                      <div class="card-header bg-transparent">Temperature</div>
-                      <div class="card-body">{{batt.last_temp}} °C</div>
+                      <div class="card-header bg-transparent text-white">Temperature</div>
+                      <div class="card-body text-white">{{batt.last_temp}} °C</div>
                   </div>
                   <div class="card border-info bg-transparent" style="width: 140px;">
-                      <div class="card-header bg-transparent">Voltage</div>
-                      <div class="card-body">{{batt.last_voltage}} V</div>
+                      <div class="card-header bg-transparent text-white">Voltage</div>
+                      <div class="card-body text-white">{{batt.last_voltage}} V</div>
                   </div>
                   <div class="card border-warning bg-transparent" style="width: 140px;">
-                      <div class="card-header bg-transparent">Charge</div>
-                      <div class="card-body">{{batt.last_soc}} %</div>
+                      <div class="card-header bg-transparent text-white">Charge</div>
+                      <div class="card-body text-white">{{batt.last_soc}} %</div>
                   </div>
                 </div>
                 {% else %}
-                  <div class="mb-3">Use this token in your Battery Management System to connect to our monitoring system.</div>
+                  <div class="mb-3 text-white">Use this token in your Battery Management System to connect to our monitoring system.</div>
                 {% endif %}
             </div>
-            <div class="row">
-                <h6 class="text-white">Token: </h6>
-                <input type="password" class="form-control" id="{{batt.id}}" value="{{batt.token}}" readonly>
+            <div class="row d-inline">
+                <h6 class="text-white d-inline">Token: </h6>
+                <input type="password" class="form-control d-inline" id="{{batt.id}}" value="{{batt.token}}" readonly>
+            </div>
                 <div class="mt-2">
-                    <form action="" method="post">
-                        <input type="hidden" id="token" name="token" value="{{batt.token}}">
                         <div class="btn btn-success" onclick="myFunction({{batt.id}})">Copy Token</div>
-                        <button type="submit" class="btn btn-danger" onclick="javascript: form.action='/delete';">Delete</button>
+                        <a class="btn btn-danger" href="/confirmdelete/{{batt.token}}">Delete</a>
                         {% if batt.last_voltage %}
-                        <button type="submit" class="btn btn-primary" onclick="javascript: form.action='/home/panel';">Open Panel</button>
+                        <a class="btn btn-primary" href="/home/panel/{{batt.token}}">Open Panel</a>
                         {% endif %}
-                    </form>
                 </div>
             </div>
         </div>
@@ -65,9 +63,17 @@
 {% endfor %}
         </div>
         </div>
+<!--            <div class="col-lg-4" style="position: fixed;">-->
+<!--                <div class="card">-->
+<!--                    Get Stuck?-->
+<!--                </div>-->
+<!--            </div>-->
+
         </div>
     </div>
 {% else %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% endwith %}
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center my-6">
   <main role="main" class="inner cover my-auto">
     <h1 class="cover-heading text-white">Oops! Nothing Here</h1>
@@ -78,6 +84,8 @@
   </main>
 </div>
     {% endif %}
+
+
 {% endblock %}
 
 
