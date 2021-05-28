@@ -51,13 +51,15 @@ class MyApi(Resource):
                                       soc_prediction,
                                       soh_prediction
                                       ])
+                comment = battery.last_message
                 battery.last_soc = soc_prediction
                 battery.last_health = soh_prediction
                 battery.last_temp = '%.2f' % float(request.form['temp'])
                 battery.last_voltage = '%.2f' % float(request.form['voltage'])
                 battery.last_time = request.form['index']
+                battery.last_message = None
                 db.session.commit()
-                return {'message': 'ok'}
+                return {'message': 'ok', 'comment': comment}
             return {'message': 'no-task'}
         return {'message': 'invalid-token'}
 

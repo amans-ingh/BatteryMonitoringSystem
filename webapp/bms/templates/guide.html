@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<div class="container">
+    <div class="overview mb-4">
+        <h1>Guidelines</h1>
+    </div>
+    <div class="row mt-4">
+        <div class="col-lg-4">
+            <img src="{{url_for('static', filename='images/step_1.webp')}}" width="70%">
+        </div>
+        <div class="col-lg-8">
+            <ul>
+                <li>Register on the Cargo BMS web UI.</li>
+                <li>Login with the registered email.</li>
+                <li>Navigate to <a href="{{url_for('home')}}">home</a> page.</li>
+                <li>Click on "Add Battery"</li>
+                <li>Enter a friendly name of the battery and specify other details.</li>
+                <li>You will be redirected to home page.</li>
+                <li>Copy the token and use in IoT client device.</li>
+                <li>Follow Step 2 to configure IoT device.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-4 mb-4">
+        <div class="col-lg-4">
+            <img src="{{url_for('static', filename='images/step_2.png')}}" width="70%">
+        </div>
+        <div class="col-lg-8">
+            <ul>
+                <li>Make sure the device connected to battery is connected to internet.</li>
+                <li>Install the client software by downloading the release file <a href="github.com" target="_blank">here</a></li>
+                <li>Run the IoT client software in the IoT device.</li>
+                <li>Provide the token number when asked (You will receive token number in step 1).</li>
+                <li>If you followed the steps properly, you IoT device is ready to communicate with the server.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

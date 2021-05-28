@@ -1,14 +1,17 @@
 import requests
-import os
-import json
 import csv
-import time
 
 
 class InternetOfThings:
     def __init__(self, end=None, token=None):
-        self.end = end
-        self.token = token
+        if end:
+            self.end = end
+        else:
+            self.end = input("Enter the endpoint: ")
+        if token:
+            self.token = token
+        else:
+            self.token = input("Enter the token: ")
 
     def auth(self):
         print('authenticating...')
@@ -16,6 +19,7 @@ class InternetOfThings:
         if response:
             response_json = response.json()
             if response_json['message'] == self.token:
+                print('authenticated successfully')
                 return 'success'
             return 'failed'
         return 'failed'
@@ -30,91 +34,22 @@ class InternetOfThings:
         return 'failed'
 
     def write(self, row_data):
-        print('data = ' + str(row_data))
         response = requests.put(self.end + self.token + '/write', data=row_data)
         if response:
             response_json = response.json()
             if response_json['message'] == 'ok':
+                comment = response_json['comment']
+                if comment:
+                    print('Comment: ' + comment)
                 return 'success'
-            elif response_json['message'] == 'invalid-token':
-                print("Authentication error")
+            else:
                 return 'auth-error'
-            return 'failed'
-        return 'failed'
-
-    def meta(self):
-        if self.end:
-            if self.token:
-                if self.auth() == 'success':
-                    return 'success'
-                else:
-                    self.token = None
-                    self.end = None
-                    return 'failed'
-            else:
-                self.token = input("Please enter the token provided: ")
-                if self.auth() == 'success':
-                    with open(self.token + '.json', 'w') as token_json_file:
-                        json.dump({'endpoint': self.end, 'token': self.token}, token_json_file)
-                    return 'success'
-                else:
-                    self.token = None
-                    self.end = None
-                    return 'failed'
-
-        elif self.token:
-            if self.end:
-                if self.auth() == 'success':
-                    return 'success'
-                else:
-                    self.token = None
-                    self.end = None
-                    return 'failed'
-            else:
-                if os.path.exists(self.token + '.json'):
-                    data = json.load(open(self.token + '.json', 'r'))
-                    self.end = data['endpoint']
-                    if self.auth() == 'success':
-                        return 'success'
-                    else:
-                        self.token = None
-                        self.end = None
-                        return 'failed'
-                else:
-                    self.end = input("Please input the API endpoint: ")
-                    if self.auth() == 'success':
-                        with open(self.token + '.json', 'w') as token_json_file:
-                            json.dump({'endpoint': self.end, 'token': self.token}, token_json_file)
-                        return 'success'
-                    else:
-                        self.token = None
-                        self.end = None
-                        return 'failed'
-        else:
-            self.token = input("Please enter the token provided: ")
-            if os.path.exists(self.token + '.json'):
-                data = json.load(open(self.token + '.json', 'r'))
-                self.end = data['endpoint']
-                if self.auth() == 'success':
-                    return 'success'
-                else:
-                    self.token = None
-                    self.end = None
-                    return 'failed'
-            else:
-                self.end = input("Enter the API endpoint: ")
-                if self.auth() == 'success':
-                    with open(self.token + '.json', 'w') as token_json_file:
-                        json.dump({'endpoint': self.end, 'token': self.token}, token_json_file)
-                    return 'success'
-                else:
-                    self.token = None
-                    self.end = None
-                    return 'failed'
+        return 'auth-error'
 
     def start(self):
-        authentication = self.meta()
+        authentication = self.auth()
         if authentication == 'success':
+            print("Uploading data")
             last_time = self.last()
             if last_time == 'success':
                 with open('csv_iot/data.csv', 'r') as csv_data:
@@ -128,14 +63,8 @@ class InternetOfThings:
                                     'index': str(row[5])
                                     }
                         w = self.write(row_json)
-                        while w != 'success':
-                            if w == 'failed':
-                                print('failed')
-                                time.sleep(2)
-                                w = self.write(row_json)
-                            else:
-                                break
                         if w == 'auth-error':
+                            print("Battery deleted from the server")
                             break
 
             elif last_time == 'failed':
@@ -154,13 +83,8 @@ class InternetOfThings:
                                         'index': str(row[5])
                                         }
                             w = self.write(row_json)
-                            while w != 'success':
-                                if w == 'failed':
-                                    time.sleep(2)
-                                    w = self.write(row_json)
-                                else:
-                                    break
                             if w == 'auth-error':
+                                print("Battery Deleted from the server")
                                 break
         else:
-            os.remove(self.token + '.json')
+            print('Authentication error')

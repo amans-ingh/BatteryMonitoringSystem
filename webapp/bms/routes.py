@@ -2,12 +2,10 @@ from flask import render_template, url_for, flash, redirect, request, make_respo
 from bms import application, bcrypt, db
 from bms.models import User, Battery
 from secrets import token_hex
-from bms.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddBattery, ChangePassword
+from bms.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddBattery, ChangePassword, MessageBattery
 import os
 from bms.charts import MyChart
 import json
-import random
-from datetime import datetime
 import time
 
 
@@ -20,14 +18,21 @@ def page_not_found(e):
 def loading():
     username = request.cookies.get('email')
     if username:
-        return redirect(url_for('index'))
+        user = User.query.filter_by(email=username).first()
+        if user:
+            return redirect(url_for('index'))
+        return redirect(url_for('logout'))
     return render_template('loading.html')
+
 
 @application.route('/index')
 def index():
     username = request.cookies.get('email')
     if username:
-        return render_template('index.html', username=username, index=1)
+        user = User.query.filter_by(email=username).first()
+        if user:
+            return render_template('index.html', username=username, index=1)
+        return redirect(url_for('logout'))
     return render_template('index.html', index=1)
 
 
@@ -36,7 +41,10 @@ def login():
     username = request.cookies.get('email')
     next_url = request.form.get("next")
     if username:
-        return redirect('/')
+        user = User.query.filter_by(email=username).first()
+        if user:
+            return redirect(url_for('index'))
+        return redirect(url_for('logout'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -57,7 +65,10 @@ def login():
 def register():
     username = request.cookies.get('email')
     if username:
-        return redirect('/')
+        user = User.query.filter_by(email=username).first()
+        if user:
+            return redirect(url_for('index'))
+        return redirect(url_for('logout'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_pw = bcrypt.generate_password_hash(
@@ -75,16 +86,17 @@ def register():
 def add():
     username = request.cookies.get('email')
     if username:
-        form = AddBattery()
-        if form.validate_on_submit():
-            user = User.query.filter_by(email=username).first()
-            battery = Battery(name=form.name.data,
-                              token=token_hex(30), user_id=user.id)
-            db.session.add(battery)
-            db.session.commit()
-            flash('Battery Added!', 'success')
-            return redirect(url_for('home'))
-        return render_template('add_battery.html', username=username, form=form, title='Add Battery')
+        user = User.query.filter_by(email=username).first()
+        if user:
+            form = AddBattery()
+            if form.validate_on_submit():
+                battery = Battery(name=form.name.data, token=token_hex(30), user_id=user.id)
+                db.session.add(battery)
+                db.session.commit()
+                flash('Battery Added!', 'success')
+                return redirect(url_for('home'))
+            return render_template('add_battery.html', username=username, form=form, title='Add Battery')
+        return redirect('logout')
     return redirect(url_for('login', next=request.endpoint))
 
 
@@ -93,8 +105,10 @@ def home():
     username = request.cookies.get('email')
     if username:
         user = User.query.filter_by(email=username).first()
-        batts = Battery.query.filter_by(user_id=user.id).all()
-        return render_template('home_page.html', username=username, batts=batts, title='Home')
+        if user:
+            batts = Battery.query.filter_by(user_id=user.id).all()
+            return render_template('home_page.html', username=username, batts=batts, title='Home')
+        return redirect(url_for('logout'))
     return redirect(url_for('login', next=request.endpoint))
 
 
@@ -103,21 +117,33 @@ def account():
     username = request.cookies.get('email')
     if username:
         user = User.query.filter_by(email=username).first()
-        form = UpdateAccountForm()
-        if form.validate_on_submit():
-            user.email = form.email.data
-            user.name = form.name.data
-            user.username = form.username.data
-            db.session.commit()
-            flash("Account Information Updated Successfully!", "success")
-            resp = make_response(redirect('/account'))
-            resp.set_cookie('email', form.email.data)
-            return resp
-        elif request.method == 'GET':
-            form.email.data = user.email
-            form.name.data = user.name
-            form.username.data = user.username
-        return render_template('account.html', username=username, form=form, user=user, title='Account')
+        if user:
+            form = UpdateAccountForm()
+            if form.validate_on_submit():
+                other_user = User.query.filter_by(email=form.email.data).first()
+                if other_user:
+                    if other_user.id != user.id:
+                        flash('Email address already taken', 'warning')
+                        return redirect(url_for('account'))
+                user.email = form.email.data
+                user.name = form.name.data
+                another_user = User.query.filter_by(username=form.username.data).first()
+                if another_user:
+                    if another_user.id != user.id:
+                        flash('Username alreadddy taken', 'warning')
+                        return redirect(url_for('account'))
+                user.username = form.username.data
+                db.session.commit()
+                flash("Account Information Updated Successfully!", "success")
+                resp = make_response(redirect('/account'))
+                resp.set_cookie('email', form.email.data)
+                return resp
+            elif request.method == 'GET':
+                form.email.data = user.email
+                form.name.data = user.name
+                form.username.data = user.username
+            return render_template('account.html', username=username, form=form, user=user, title='Account')
+        return redirect(url_for('logout'))
     return redirect(url_for('login', next=request.endpoint))
 
 
@@ -126,26 +152,29 @@ def changepassword():
     username = request.cookies.get('email')
     if username:
         user = User.query.filter_by(email=username).first()
-        form = ChangePassword()
-        if form.validate_on_submit():
-            if bcrypt.check_password_hash(user.password, form.password.data):
-                user.password = bcrypt.generate_password_hash(
-                    form.new_password.data).decode('utf-8')
-                db.session.commit()
-                flash('Password changed successfully', 'info')
-                return redirect(url_for('account'))
-            else:
-                flash('Incorrect password!, Please try again.', 'danger')
-                return redirect('changepassword')
-        elif request.method == 'GET':
-            form.username = user.username
-        return render_template('change_password.html', form=form, username=username, user=user, title='Change Password')
+        if user:
+            form = ChangePassword()
+            if form.validate_on_submit():
+                if bcrypt.check_password_hash(user.password, form.password.data):
+                    user.password = bcrypt.generate_password_hash(
+                        form.new_password.data).decode('utf-8')
+                    db.session.commit()
+                    flash('Password changed successfully', 'info')
+                    return redirect(url_for('account'))
+                else:
+                    flash('Incorrect password!, Please try again.', 'danger')
+                    return redirect('changepassword')
+            elif request.method == 'GET':
+                form.username = user.username
+            return render_template('change_password.html',
+                                   form=form, username=username, user=user, title='Change Password')
+        return redirect(url_for('logout'))
     return redirect(url_for('login', next=request.endpoint))
 
 
 @application.route('/logout')
 def logout():
-    resp = make_response(redirect('/'))
+    resp = make_response(redirect(url_for('index')))
     resp.delete_cookie('email')
     return resp
 
@@ -154,26 +183,37 @@ def logout():
 def confirm_delete(token):
     username = request.cookies.get('email')
     if username:
-        if request.method == 'GET':
-            battery = Battery.query.filter_by(token=token).first()
-            if battery:
-                return render_template('confirm_delete.html', token=token, username=username, title='Confirm Delete')
+        user = User.query.filter_by(email=username).first()
+        if user:
+            if request.method == 'GET':
+                battery = Battery.query.filter_by(token=token).first()
+                if battery:
+                    return render_template('confirm_delete.html', token=token, username=username, title='Confirm Delete')
+                return redirect(url_for('home'))
             return redirect(url_for('home'))
-        return redirect(url_for('home'))
+        return redirect(url_for('logout'))
     return redirect(url_for('login'))
+
 
 @application.route('/delete/<token>', methods=['GET', 'POST'])
 def delete(token):
     username = request.cookies.get('email')
     if username:
-        if request.method == 'GET':
-            Battery.query.filter_by(token=token).delete()
-            db.session.commit()
-            if os.path.exists('csv/'+token+'.csv'):
-                os.remove('csv/'+token+'.csv')
-            flash('The battery has been deleted!', 'info')
-            return redirect('/home')
-        return redirect(url_for('home'))
+        user = User.query.filter_by(email=username).first()
+        battery = Battery.query.filter_by(token=token).first()
+        if user:
+            if battery:
+                if request.method == 'GET':
+                    Battery.query.filter_by(token=token).delete()
+                    db.session.commit()
+                    if os.path.exists('csv/'+token+'.csv'):
+                        os.remove('csv/'+token+'.csv')
+                    flash('The battery has been deleted!', 'info')
+                    return redirect('/home')
+                return redirect(url_for('home'))
+            flash('Battery with given token not found!', 'warning')
+            return redirect(url_for('home'))
+        return redirect(url_for('logout'))
     return redirect(url_for('home'))
 
 
@@ -191,28 +231,66 @@ def forgot_password():
 def panel(token):
     username = request.cookies.get('email')
     if username:
-        if request.method == 'GET':
-            battery = Battery.query.filter_by(token=token).first()
-            if battery:
-                chartdata = MyChart(token)
-                time = chartdata.sample('time', 30, 1000)
-                voltage = chartdata.sample('voltage', 30, 1000)
-                temp = chartdata.sample('temp', 30, 1000)
-                charge = chartdata.sample('soc', 30, 1000)
-                health = chartdata.sample_all('soh', 30)
-                return render_template('panel.html',
-                                       title='Dashboard',
-                                       username=username,
-                                       time=time,
-                                       temp=temp,
-                                       voltage=voltage,
-                                       charge=charge,
-                                       battery=battery,
-                                       health=health,
-                                       token=token
-                                       )
-        return render_template('panel.html', title='Dashboard', username=username)
+        user = User.query.filter_by(email=username).first()
+        if user:
+            if request.method == 'GET':
+                battery = Battery.query.filter_by(token=token).first()
+                if battery:
+                    chartdata = MyChart(token)
+                    time = chartdata.sample('time', 30, 1000)
+                    voltage = chartdata.sample('voltage', 30, 1000)
+                    temp = chartdata.sample('temp', 30, 1000)
+                    charge = chartdata.sample('soc', 30, 1000)
+                    health = chartdata.sample_all('soh', 30)
+                    return render_template('panel.html',
+                                           title='Dashboard',
+                                           username=username,
+                                           time=time,
+                                           temp=temp,
+                                           voltage=voltage,
+                                           charge=charge,
+                                           battery=battery,
+                                           health=health,
+                                           token=token
+                                           )
+            return render_template('panel.html', title='Dashboard', username=username)
+        return redirect(url_for('logout'))
     return redirect(url_for('login', next=request.endpoint))
+
+
+@application.route('/guide')
+def guide():
+    username = request.cookies.get('email')
+    if username:
+        return render_template('guide.html', username=username, title='Guide')
+    return render_template('guide.html')
+
+
+@application.route('/message/<token>', methods=['GET', 'POST'])
+def message(token):
+    username = request.cookies.get('email')
+    if username:
+        user = User.query.filter_by(email=username).first()
+        battery = Battery.query.filter_by(token=token).first()
+        if user:
+            if battery:
+                form = MessageBattery()
+                if form.validate_on_submit():
+                    if battery:
+                        battery.last_message = form.message.data
+                        battery.note = form.message.data
+                        db.session.commit()
+                        flash('Note updated successfully', 'success')
+                        return redirect(url_for('home'))
+                    flash('Invalid Token', 'danger')
+                    return redirect(url_for('home'))
+                elif request.method == 'GET':
+                    form.message.data = battery.note
+                return render_template('message.html',
+                                       username=username, title='Message Battery', form=form, battery=battery)
+            return redirect(url_for('home'))
+        return redirect(url_for('logout'))
+    return redirect(url_for('login'))
 
 
 @application.route('/chart-data/<token>')
@@ -221,7 +299,7 @@ def chart_data(token):
         while True:
             battery = Battery.query.filter_by(token=token).first()
             chartdata = MyChart(token)
-            time = chartdata.sample('time', 30, 1000)
+            times = chartdata.sample('time', 30, 1000)
             voltage = chartdata.sample('voltage', 30, 1000)
             vol = battery.last_voltage
             temp = chartdata.sample('temp', 30, 1000)
@@ -231,7 +309,7 @@ def chart_data(token):
             health = chartdata.sample_all('soh', 30)
             soh = battery.last_health
             json_data = json.dumps(
-                {'time': time,
+                {'time': times,
                  'voltage': voltage,
                  'temp': temp,
                  'charge': charge,

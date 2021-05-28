@@ -23,6 +23,8 @@ class Battery(db.Model):
     last_soc = db.Column(db.Float, nullable=True)
     last_voltage = db.Column(db.Float, nullable=True)
     last_time = db.Column(db.Float, nullable=True)
+    last_message = db.Column(db.String(200), nullable=True)
+    note = db.Column(db.String(200), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):

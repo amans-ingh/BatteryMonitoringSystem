@@ -1,76 +1,77 @@
 {% extends "layout.html" %}
 {% block content %}
 {% if batts %}
-    <div role="main" class="container">
-        <div class="row">
-        <div class="col-lg-8">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-              {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
-                  {{ message }}
-                </div>
-              {% endfor %}
-            {% endif %}
-          {% endwith %}
+<div role="main" class="container">
+  <div class="row">
+      <div class="col-lg-8">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+        {{ message }}
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+          
+      {% for batt in batts %}
 
-
-        <div>
-{% for batt in batts %}
-    <div class="card bg-dark text-white mb-4">
+      <div class="card bg-dark text-white mb-4">
         <div class="card-header">
-            {{batt.name}}
+          {{batt.name}}
         </div>
         <div class="card-body ml-2 mr-2">
-            <div class="row justify-content-center bg-transparent ">
-                {% if batt.last_voltage %}
-                <div class="card-group mb-3">
-                  <div class="card border-success bg-transparent" style="width: 140px;">
-                       <div class="card-header bg-transparent text-white">Health</div>
-                       <div class="card-body text-white">{{batt.last_health}} %</div>
-                  </div>
-                  <div class="card border-primary bg-transparent" style="width: 140px;">
-                      <div class="card-header bg-transparent text-white">Temperature</div>
-                      <div class="card-body text-white">{{batt.last_temp}} °C</div>
-                  </div>
-                  <div class="card border-info bg-transparent" style="width: 140px;">
-                      <div class="card-header bg-transparent text-white">Voltage</div>
-                      <div class="card-body text-white">{{batt.last_voltage}} V</div>
-                  </div>
-                  <div class="card border-warning bg-transparent" style="width: 140px;">
-                      <div class="card-header bg-transparent text-white">Charge</div>
-                      <div class="card-body text-white">{{batt.last_soc}} %</div>
-                  </div>
-                </div>
-                {% else %}
-                  <div class="mb-3 text-white">Use this token in your Battery Management System to connect to our monitoring system.</div>
-                {% endif %}
+          <div class="row justify-content-center bg-transparent ">
+            {% if batt.last_voltage %}
+            <div class="card-group mb-3">
+              <div class="card border-success bg-transparent">
+                <div class="card-header bg-transparent text-white">Health</div>
+                <div class="card-body text-white">{{batt.last_health}} %</div>
+              </div>
+              <div class="card border-primary bg-transparent">
+                <div class="card-header bg-transparent text-white">Temperature</div>
+                <div class="card-body text-white">{{batt.last_temp}} °C</div>
+              </div>
+              <div class="card border-info bg-transparent">
+                <div class="card-header bg-transparent text-white">Voltage</div>
+                <div class="card-body text-white">{{batt.last_voltage}} V</div>
+              </div>
+              <div class="card border-warning bg-transparent">
+                <div class="card-header bg-transparent text-white">Charge</div>
+                <div class="card-body text-white">{{batt.last_soc}} %</div>
+              </div>
             </div>
-            <div class="row d-inline">
-                <h6 class="text-white d-inline">Token: </h6>
-                <input type="password" class="form-control d-inline" id="{{batt.id}}" value="{{batt.token}}" readonly>
-            </div>
-                <div class="mt-2">
-                        <div class="btn btn-success" onclick="myFunction({{batt.id}})">Copy Token</div>
-                        <a class="btn btn-danger" href="/confirmdelete/{{batt.token}}">Delete</a>
-                        {% if batt.last_voltage %}
-                        <a class="btn btn-primary" href="/home/panel/{{batt.token}}">Open Panel</a>
-                        {% endif %}
-                </div>
-            </div>
+            {% else %}
+            <div class="mb-3 text-white">Use this token in your Battery Management System to connect to our monitoring
+              system.</div>
+            {% endif %}
+          </div>
+          <div class="row d-inline">
+            <h6 class="text-white d-inline">Token: </h6>
+            <input type="password" class="form-control d-inline" id="{{batt.id}}" value="{{batt.token}}" readonly>
+          </div>
+          <div class="mt-2">
+            <div class="btn btn-success" onclick="myFunction({{batt.id}})">Copy Token</div>
+            <a class="btn btn-danger" href="/confirmdelete/{{batt.token}}">Delete</a>
+            {% if batt.last_voltage %}
+            <a class="btn btn-primary" href="/home/panel/{{batt.token}}">Open Panel</a>
+            {% endif %}
+            <a class="btn btn-info" href="/message/{{batt.token}}">Note</a>
+          </div>
         </div>
-    </div>
-{% endfor %}
-        </div>
-        </div>
-<!--            <div class="col-lg-4" style="position: fixed;">-->
-<!--                <div class="card">-->
-<!--                    Get Stuck?-->
-<!--                </div>-->
-<!--            </div>-->
+      </div>
 
-        </div>
+      {% endfor %}
     </div>
+    <div class="col-lg-4">
+      <div class="card bg-dark text-white position-fixed" style="width: 300px;">
+        <div class="card-header">Need Help?</div>
+        <div class="card-body text-white">Folllow our guide to get started. The guide will tell you how to configure your IoT device and get started.</div>
+        <a class="btn btn-primary" href="/guide">Guide</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% else %}
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% endwith %}
@@ -83,27 +84,23 @@
     </p>
   </main>
 </div>
-    {% endif %}
-
-
+{% endif %}
 {% endblock %}
-
-
 
 
 {% block script %}
 <script>
-    function myFunction(x) {
-  /* Get the text field */
-  var copyText = document.getElementById(x);
-  document.getElementById(x).type = 'text';
+  function myFunction(x) {
+    /* Get the text field */
+    var copyText = document.getElementById(x);
+    document.getElementById(x).type = 'text';
 
-  /* Select the text field */
-  copyText.select();
-  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+    /* Select the text field */
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
-  /* Copy the text inside the text field */
-  document.execCommand("copy");
-}
+    /* Copy the text inside the text field */
+    document.execCommand("copy");
+  }
 </script>
 {% endblock %}
